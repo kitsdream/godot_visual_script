@@ -42,7 +42,7 @@
 #include "editor/editor_node.h"
 #include "editor/editor_scale.h"
 #include "editor/editor_settings.h"
-#include "editor/visual_script_property_selector.h"
+#include "modules/visual_script/editor/visual_script_property_selector.h"
 #include "scene/main/node.h"
 #include "scene/main/window.h"
 
