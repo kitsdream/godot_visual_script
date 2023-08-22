@@ -711,18 +711,18 @@ bool VisualScriptPropertySelector::SearchRunner::_phase_match_classes_init() {
 			(selector_ui->base_script.unquote() != ".") &&
 			!combined_docs.has(selector_ui->base_script)) {
 		String file_path = "res://" + selector_ui->base_script.unquote(); // EditorHelp::get_doc_data().name to filepath
-		Ref<Script> script;
-		script = ResourceLoader::load(file_path);
-		if (!script.is_null()) {
+		Ref<Script> phase_match_script;
+		phase_match_script = ResourceLoader::load(file_path);
+		if (!phase_match_script.is_null()) {
 			DocData::ClassDoc class_doc = DocData::ClassDoc();
 
 			class_doc.name = selector_ui->base_script;
 
-			class_doc.inherits = script->get_instance_base_type();
+			class_doc.inherits = phase_match_script->get_instance_base_type();
 			class_doc.brief_description = ".vs files not supported by EditorHelp::get_doc_data()";
 			class_doc.description = "";
 
-			Object *obj = ObjectDB::get_instance(script->get_instance_id());
+			Object *obj = ObjectDB::get_instance(phase_match_script->get_instance_id());
 			if (Object::cast_to<Script>(obj)) {
 				List<MethodInfo> methods;
 				Object::cast_to<Script>(obj)->get_script_method_list(&methods);
