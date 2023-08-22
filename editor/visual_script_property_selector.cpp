@@ -39,6 +39,7 @@
 #include "core/string/string_name.h"
 #include "editor/doc_tools.h"
 #include "editor/editor_feature_profile.h"
+#include "editor/editor_node.h"
 #include "editor/editor_scale.h"
 #include "editor/editor_settings.h"
 #include "scene/main/node.h"
