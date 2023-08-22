@@ -113,89 +113,6 @@ void VisualScriptPropertySelector::_update_results() {
 	_update_icons();
 	search_runner = Ref<SearchRunner>(memnew(SearchRunner(this, results_tree)));
 	set_process(true);
-
-	TreeItem *root = results_tree->create_item();
-
-	if (search_classes->is_pressed()) {
-		List<StringName> class_list;
-		ClassDB::get_class_list(&class_list);
-
-		for (const StringName &class_name : class_list) {
-			if (search_box->get_text().findn(String(class_name)) == -1) {
-				continue;
-			}
-
-			TreeItem *item = results_tree->create_item(root);
-			item->set_text(0, String(class_name));
-			item->set_icon(
-					0, EditorNode::get_singleton()->get_class_icon(class_name, "Object"));
-			item->set_metadata(0, "class:" + String(class_name));
-		}
-	}
-
-	if (search_methods->is_pressed()) {
-		List<StringName> class_list;
-		ClassDB::get_class_list(&class_list);
-
-		for (const StringName &class_name : class_list) {
-			List<MethodInfo> method_list;
-			ClassDB::get_method_list(class_name, &method_list, true);
-
-			for (const MethodInfo &method_info : method_list) {
-				if (method_info.name.findn(search_box->get_text()) == -1 &&
-						(method_info.flags & METHOD_FLAG_VIRTUAL) != 0) {
-					continue;
-				}
-
-				TreeItem *item = results_tree->create_item(root);
-				item->set_text(0, String(class_name) + "::" + method_info.name);
-				item->set_icon(0, EditorNode::get_singleton()->get_class_icon(class_name, "Object"));
-				item->set_metadata(0, "method:" + String(class_name) + "::" + method_info.name);
-			}
-		}
-	}
-
-	if (search_properties->is_pressed()) {
-		List<StringName> class_list;
-		ClassDB::get_class_list(&class_list);
-
-		for (const StringName &class_name : class_list) {
-			List<PropertyInfo> property_list;
-			ClassDB::get_property_list(class_name, &property_list, true);
-
-			for (const PropertyInfo &property_info : property_list) {
-				if (property_info.name.findn(search_box->get_text()) == -1) {
-					continue;
-				}
-
-				TreeItem *item = results_tree->create_item(root);
-				item->set_text(0, String(class_name) + "::" + property_info.name);
-				item->set_icon(0, EditorNode::get_singleton()->get_class_icon(class_name, "Object"));
-				item->set_metadata(0, "property:" + String(class_name) + "::" + property_info.name);
-			}
-		}
-	}
-
-	if (search_signals->is_pressed()) {
-		List<StringName> class_list;
-		ClassDB::get_class_list(&class_list);
-
-		for (const StringName &class_name : class_list) {
-			List<MethodInfo> signal_list;
-			ClassDB::get_signal_list(class_name, &signal_list, true);
-
-			for (const MethodInfo &signal_info : signal_list) {
-				if (signal_info.name.findn(search_box->get_text()) == -1) {
-					continue;
-				}
-
-				TreeItem *item = results_tree->create_item(root);
-				item->set_text(0, String(class_name) + "::" + signal_info.name);
-				item->set_icon(0, EditorNode::get_singleton()->get_class_icon(class_name, "Object"));
-				item->set_metadata(0, "signal:" + String(class_name) + "::" + signal_info.name);
-			}
-		}
-	}
 }
 
 void VisualScriptPropertySelector::_confirmed() {
@@ -256,10 +173,10 @@ void VisualScriptPropertySelector::select_method_from_base_type(
 	connecting = p_connecting;
 
 	if (clear_text && !p_virtuals_only) {
-		search_box->set_text(" "); // show all methods
+		search_box->set_text("."); // show all methods.
 		search_box->set_caret_column(1);
 	} else {
-		search_box->set_text("._"); // show all _methods
+		search_box->set_text("._"); // show all _methods.
 		search_box->set_caret_column(2);
 	}
 
@@ -286,7 +203,7 @@ void VisualScriptPropertySelector::select_from_visual_script(
 	base_type = p_script->get_instance_base_type();
 	base_script = p_script->get_path()
 						  .trim_prefix("res://")
-						  .quote(); // filepath to EditorHelp::get_doc_data().name
+						  .quote();
 	type = Variant::NIL;
 	connecting = true;
 
@@ -316,16 +233,16 @@ void VisualScriptPropertySelector::select_from_base_type(
 	set_title(TTR("Select from base type"));
 	base_type = p_base;
 	base_script = p_base_script.trim_prefix("res://")
-						  .quote(); // filepath to EditorHelp::get_doc_data().name
+						  .quote();
 	type = Variant::NIL;
 	connecting = p_connecting;
 
 	if (clear_text) {
 		if (p_virtuals_only) {
-			search_box->set_text("._"); // show all _methods
+			search_box->set_text("._"); // show all _methods.
 			search_box->set_caret_column(2);
 		} else {
-			search_box->set_text("."); // show all methods
+			search_box->set_text("."); // show all methods.
 			search_box->set_caret_column(1);
 		}
 	}
@@ -345,6 +262,7 @@ void VisualScriptPropertySelector::select_from_base_type(
 	results_tree->clear();
 	show_window(.5f);
 	search_box->grab_focus();
+	_update_results();
 }
 
 void VisualScriptPropertySelector::select_from_script(
@@ -355,7 +273,7 @@ void VisualScriptPropertySelector::select_from_script(
 	base_type = p_script->get_instance_base_type();
 	base_script = p_script->get_path()
 						  .trim_prefix("res://")
-						  .quote(); // filepath to EditorHelp::get_doc_data().name
+						  .quote();
 	type = Variant::NIL;
 	script = p_script->get_instance_id();
 	connecting = p_connecting;
@@ -381,6 +299,7 @@ void VisualScriptPropertySelector::select_from_script(
 	results_tree->clear();
 	show_window(.5f);
 	search_box->grab_focus();
+	_update_results();
 }
 
 void VisualScriptPropertySelector::select_from_basic_type(
@@ -413,6 +332,7 @@ void VisualScriptPropertySelector::select_from_basic_type(
 	results_tree->clear();
 	show_window(.5f);
 	search_box->grab_focus();
+	_update_results();
 }
 
 void VisualScriptPropertySelector::select_from_instance(Object *p_instance,
@@ -427,14 +347,14 @@ void VisualScriptPropertySelector::select_from_instance(Object *p_instance,
 	} else {
 		base_script = p_script->get_path()
 							  .trim_prefix("res://")
-							  .quote(); // filepath to EditorHelp::get_doc_data().name
+							  .quote();
 	}
 
 	type = Variant::NIL;
 	connecting = p_connecting;
 
 	if (clear_text) {
-		search_box->set_text(".");
+		search_box->set_text(" ");
 	} else {
 		search_box->set_text(base_type);
 	}
@@ -454,6 +374,7 @@ void VisualScriptPropertySelector::select_from_instance(Object *p_instance,
 	results_tree->clear();
 	show_window(.5f);
 	search_box->grab_focus();
+	_update_results();
 }
 
 void VisualScriptPropertySelector::show_window(float p_screen_ratio) {
