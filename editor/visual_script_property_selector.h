@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  visual_script_property_selector.cpp                                   */
+/*  visual_script_property_selector.h                                   */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
