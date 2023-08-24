@@ -34,9 +34,12 @@
 #include "../visual_script_flow_control.h"
 #include "../visual_script_func_nodes.h"
 #include "../visual_script_nodes.h"
+#include "core/object/script_language.h"
 #include "core/os/keyboard.h"
+#include "core/string/string_name.h"
 #include "editor/doc_tools.h"
 #include "editor/editor_feature_profile.h"
+#include "editor/editor_node.h"
 #include "editor/editor_scale.h"
 #include "editor/editor_settings.h"
 #include "scene/main/node.h"
@@ -175,7 +178,39 @@ void VisualScriptPropertySelector::select_method_from_base_type(const String &p_
 	results_tree->clear();
 	show_window(.5f);
 	search_box->grab_focus();
+	_update_results();
+}
 
+void VisualScriptPropertySelector::select_from_visual_script(const Ref<Script> &p_script, bool clear_text) {
+	set_title(TTR("Select from visual script"));
+	base_type = p_script->get_instance_base_type();
+	if (p_script == nullptr) {
+		base_script = "";
+	} else {
+		base_script = p_script->get_path().trim_prefix("res://").quote();
+	}
+	type = Variant::NIL;
+	connecting = false;
+
+	if (clear_text) {
+		search_box->set_text("");
+	}
+	search_box->select_all();
+
+	search_visual_script_nodes->set_pressed(true);
+	search_classes->set_pressed(false);
+	search_methods->set_pressed(true);
+	search_operators->set_pressed(false);
+	search_signals->set_pressed(true);
+	search_constants->set_pressed(true);
+	search_properties->set_pressed(true);
+	search_theme_items->set_pressed(false);
+
+	scope_combo->select(COMBO_BASE);
+
+	results_tree->clear();
+	show_window(.5f);
+	search_box->grab_focus();
 	_update_results();
 }
 
@@ -190,7 +225,7 @@ void VisualScriptPropertySelector::select_from_base_type(const String &p_base, c
 		if (p_virtuals_only) {
 			search_box->set_text("_");
 		} else {
-			search_box->set_text(" ");
+			search_box->set_text("");
 		}
 	}
 	search_box->select_all();
@@ -253,7 +288,7 @@ void VisualScriptPropertySelector::select_from_basic_type(Variant::Type p_type, 
 	connecting = p_connecting;
 
 	if (clear_text) {
-		search_box->set_text(" ");
+		search_box->set_text("");
 	}
 	search_box->select_all();
 
@@ -267,36 +302,6 @@ void VisualScriptPropertySelector::select_from_basic_type(Variant::Type p_type, 
 	search_theme_items->set_pressed(false);
 
 	scope_combo->select(COMBO_BASE);
-
-	results_tree->clear();
-	show_window(.5f);
-	search_box->grab_focus();
-
-	_update_results();
-}
-
-void VisualScriptPropertySelector::select_from_action(const String &p_type, const bool p_connecting, bool clear_text) {
-	set_title(TTR("Select from action"));
-	base_type = p_type;
-	base_script = "";
-	type = Variant::NIL;
-	connecting = p_connecting;
-
-	if (clear_text) {
-		search_box->set_text("");
-	}
-	search_box->select_all();
-
-	search_visual_script_nodes->set_pressed(true);
-	search_classes->set_pressed(false);
-	search_methods->set_pressed(false);
-	search_operators->set_pressed(false);
-	search_signals->set_pressed(false);
-	search_constants->set_pressed(false);
-	search_properties->set_pressed(false);
-	search_theme_items->set_pressed(false);
-
-	scope_combo->select(COMBO_RELATED);
 
 	results_tree->clear();
 	show_window(.5f);
@@ -319,7 +324,7 @@ void VisualScriptPropertySelector::select_from_instance(Object *p_instance, cons
 	connecting = p_connecting;
 
 	if (clear_text) {
-		search_box->set_text(" ");
+		search_box->set_text("");
 	}
 	search_box->select_all();
 
@@ -340,38 +345,7 @@ void VisualScriptPropertySelector::select_from_instance(Object *p_instance, cons
 	_update_results();
 }
 
-void VisualScriptPropertySelector::select_from_visual_script(const Ref<Script> &p_script, bool clear_text) {
-	set_title(TTR("Select from visual script"));
-	base_type = p_script->get_instance_base_type();
-	if (p_script == nullptr) {
-		base_script = "";
-	} else {
-		base_script = p_script->get_path().trim_prefix("res://").quote();
-	}
-	type = Variant::NIL;
-	connecting = false;
 
-	if (clear_text) {
-		search_box->set_text(" ");
-	}
-	search_box->select_all();
-
-	search_visual_script_nodes->set_pressed(true);
-	search_classes->set_pressed(false);
-	search_methods->set_pressed(true);
-	search_operators->set_pressed(false);
-	search_signals->set_pressed(true);
-	search_constants->set_pressed(true);
-	search_properties->set_pressed(true);
-	search_theme_items->set_pressed(false);
-
-	scope_combo->select(COMBO_BASE);
-
-	results_tree->clear();
-	show_window(.5f);
-	search_box->grab_focus();
-	_update_results();
-}
 
 void VisualScriptPropertySelector::show_window(float p_screen_ratio) {
 	popup_centered_ratio(p_screen_ratio);
